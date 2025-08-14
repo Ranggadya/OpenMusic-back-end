@@ -11,6 +11,7 @@ class SongsHandler {
 
     postSongHandler(request, h) {
         try {
+            this._validator.validateSongPayload(request.payload);
             const { title, year, genre, performer, duration, albumId } = request.payload;
             const songId = this._service.addSong({ title, year, genre, performer, duration, albumId });
 
@@ -64,6 +65,7 @@ class SongsHandler {
 
     putSongByIdHandler(request, h) {
         try {
+            this._validator.validateSongPayload(request.payload);
             const { id } = request.params;
             this._service.editSongById(id, request.payload);
             return {
