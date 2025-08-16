@@ -9,14 +9,14 @@ class SongsService {
         this._pool = new Pool();
     }
 
-    async addSong({ title, year, genre, performer, duration, album_id }) {
+    async addSong({ title, year, genre, performer, duration, albumId }) {
         const id = `song-${nanoid(16)}`;
         const createdAt = new Date().toISOString();
         const updatedAt = createdAt;
 
         const query = {
             text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
-            values: [id, title, year, genre, performer, duration, album_id, createdAt, updatedAt],
+            values: [id, title, year, genre, performer, duration, albumId, createdAt, updatedAt],
         };
 
         const result = await this._pool.query(query);
@@ -49,13 +49,16 @@ class SongsService {
             query += ` WHERE ${conditions.join(' AND ')}`;
         }
 
-        const result = await this._pool.query(query, values);
+        const result = await this._pool.query({
+            text: query,
+            values
+        });
         return result.rows;
     }
 
     async getSongById(id) {
         const query = {
-            text: 'SELECT * FROM songs WHERE id = $1',
+            text: 'SELECT id, title, year, performer, genre, duration, album_id FROM songs WHERE id = $1',
             values: [id],
         };
         const result = await this._pool.query(query);
@@ -103,10 +106,10 @@ class SongsService {
         }
     }
 
-    async getSongsByAlbumId(albumId) {
+    async getSongsByAlbumId(album_id) {
         const query = {
             text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
-            values: [albumId],
+            values: [album_id],
         };
         const result = await this._pool.query(query);
         return result.rows;

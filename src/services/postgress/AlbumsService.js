@@ -70,7 +70,7 @@ class AlbumsService {
 
     async getAlbumWithSongs(id) {
         const albumResult = await this._pool.query({
-            text: 'SELECT id, name, year FROM albums WHERE id = $1',
+            text: 'SELECT * FROM albums WHERE id = $1',
             values: [id],
         });
 
@@ -83,9 +83,19 @@ class AlbumsService {
             values: [id],
         });
 
+        if (!albumResult.rows.length) {
+            throw new NotFoundError('Album tidak ditemukan');
+        }
+
+        const album = albumResult.rows[0];
+        const songs = songsResult.rows;
+
+
         return {
-            ...albumResult.rows[0],
-            songs: songsResult.rows,
+            id: album.id,
+            name: album.name,
+            year: album.year,
+            songs,
         };
     }
 
