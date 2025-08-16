@@ -1,105 +1,63 @@
+/* eslint-disable no-unused-vars */
+const ClientError = require("../../../Exceptions/ClientError");
+
 class AlbumsHandler {
     constructor(service, validator) {
         this._service = service;
         this._validator = validator;
 
         this.postAlbumHandler = this.postAlbumHandler.bind(this);
-        this.getAlbumsHandler = this.getAlbumsHandler.bind(this);
         this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
         this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
         this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
     }
 
-    postAlbumHandler(request, h) {
-        try {
-            this._validator.validateAlbumPayload(request.payload);
-            const { name, year } = request.payload;
-            const albumId = this._service.addAlbum({ name, year });
+    async postAlbumHandler(request, h) {
+        this._validator.validateAlbumPayload(request.payload);
+        const { name, year } = request.payload;
+        const albumId = await this._service.addAlbum({ name, year });
 
-            return {
-                status: 'success',
-                message: 'Album berhasil ditambahkan',
-                data: {
-                    albumId,
-                },
-            };
-        } catch (error) {
-            const response = h.response({
-                status: 'fail',
-                message: error.message,
-            });
-            response.code(400);
-            return response;
-        }
+        const response = h.response({
+            status: 'success',
+            message: 'Album berhasil ditambahkan',
+            data: {
+                albumId,
+            },
+        });
+        response.code(201);
+        return response;
+
     }
 
-    getAlbumsHandler() {
-        const albums = this._service.getAlbums();
+    async getAlbumByIdHandler(request, h) {
+        const { id } = request.params;
+        const albumWithSongs = await this._service.getAlbumWithSongs(id);
         return {
             status: 'success',
             data: {
-                albums,
+                album: albumWithSongs,
             },
+        }
+    }
+
+    async putAlbumByIdHandler(request, h) {
+        this._validator.validateAlbumPayload(request.payload);
+        const { id } = request.params;
+        await this._service.editAlbumById(id, request.payload);
+        return {
+            status: 'success',
+            message: 'Album berhasil diperbarui',
         };
     }
 
-    getAlbumByIdHandler(request, h) {
-        try {
-            const { id } = request.param;
-            const album = this._service.getAlbumById(id);
-            return {
-                status: 'success',
-                data: {
-                    album,
-                },
-            }
-        } catch (error) {
-            const response = h.response({
-                status: 'fail',
-                message: error.message,
-            });
-            response.code(404);
-            return response;
+    async deleteAlbumByIdHandler(request, h) {
+        const { id } = request.params;
+        await this._service.deleteAlbumById(id);
+        return {
+            status: 'success',
+            message: 'Album berhasil dihapus',
         }
-    }
 
-    putAlbumByIdHandler(request, h) {
-        try {
-            this._validator.validateAlbumPayload(request.payload);
-            const { id } = request.params;
-            this._service.editAlbumById(id, request.payload);
-            return {
-                status: 'success',
-                message: 'Album berhasil diperbarui',
-            };
-        } catch (error) {
-            const response = h.response({
-                status: 'fail',
-                message: error.message,
-            });
-            response.code(404);
-            return response;
-        }
-    }
-
-    deleteAlbumByIdHandler(request, h) {
-        try {
-            const { id } = request.params;
-            this._service.deleteAlbum(id);
-            return {
-                status: 'success',
-                message: 'Album berhasil dihapus',
-            }
-        } catch (error) {
-            const response = h.response({
-                status: 'fail',
-                message: error.message,
-
-            });
-            response.code(404);
-            return response;
-        }
     }
 }
-
 module.exports = { AlbumsHandler };
