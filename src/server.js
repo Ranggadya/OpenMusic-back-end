@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const AlbumsService = require('./services/postgress/AlbumsService');
@@ -6,11 +7,15 @@ const albums = require('./api/music/albums');
 const songs = require('./api/music/songs');
 const AlbumValidator = require('./validator/albums');
 const SongValidator = require('./validator/songs');
+const users = require('./api/music/users');
+const UsersService = require('./services/postgress/UsersService');
 const ClientError = require('./Exceptions/ClientError');
+const UsersValidator = require('./validator/users');
 
 const init = async () => {
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
+  const usersService = new UsersService();
 
   const server = Hapi.server({
     port: process.env.PORT || 3000,
@@ -35,6 +40,13 @@ const init = async () => {
       options: {
         service: songsService,
         validator: SongValidator,
+      },
+    },
+    {
+      plugin: users,
+      options: {
+        service: usersService,
+        validator: UsersValidator,
       },
     },
   ]);
