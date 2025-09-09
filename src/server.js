@@ -9,7 +9,7 @@ const AlbumValidator = require('./validator/albums');
 const SongValidator = require('./validator/songs');
 const users = require('./api/music/users');
 const UsersService = require('./services/postgress/UsersService');
-const ClientError = require('./Exceptions/ClientError');
+const ClientError = require('./exceptions/ClientError');
 const UsersValidator = require('./validator/users');
 
 const init = async () => {
