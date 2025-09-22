@@ -2,9 +2,10 @@
 /* eslint-disable no-underscore-dangle */
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
-const InvariantError = require('../../Exceptions/InvariantError');
-const NotFoundError = require('../../Exceptions/NotFoundError');
+const InvariantError = require('../../exceptions/InvariantError');
+
 const { mapSong } = require('../../utils');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class SongsService {
   constructor() {
@@ -32,7 +33,7 @@ class SongsService {
     return result.rows[0].id;
   }
 
-  async getSongs(title, performer) {
+  async getSongs({ title, performer }) {
     let query = 'SELECT id, title, performer FROM songs';
     const conditions = [];
     const values = [];
@@ -120,6 +121,18 @@ class SongsService {
     };
     const result = await this._pool.query(query);
     return result.rows;
+  }
+
+  async verifySongExists(id) {
+    const query = {
+      text: 'SELECT id FROM songs WHERE id = $1',
+      values: [id],
+    };
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Lagu tidak ditemukan');
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-unused-vars */
-const ClientError = require('../../../Exceptions/ClientError');
+const ClientError = require('../../../exceptions/ClientError');
 
 class AlbumsHandler {
   constructor(service, validator) {
